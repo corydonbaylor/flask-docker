@@ -1,24 +1,21 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.12-slim
+FROM python:3.11-alpine
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy poetry.lock and pyproject.toml files first for better caching of dependencies
-COPY pyproject.toml poetry.lock* ./
+# Copy requirements.txt and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Poetry and dependencies
-RUN pip install --no-cache-dir poetry && poetry install --no-dev
-
-# Copy the rest of the application code, including tests
+# Copy the rest of the application code
 COPY . .
 
-# Run tests using pytest (optional)
-RUN poetry run pytest -v
+# Expose port 5000 to access the app
+EXPOSE 5000
 
-# Command to run your application using the entry point defined in pyproject.toml
-CMD ["poetry", "run", "pack-cli"]  # This runs your CLI command defined in pyproject.toml
+CMD ["python", "app.py"] 
